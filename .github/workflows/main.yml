@@ -1,0 +1,36 @@
+name: Build and Push Docker Image to Docker Hub
+
+on:
+  push:
+    branches:
+      - main   # main 브랜치에 push될 때 자동 실행
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ 소스코드 가져오기
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2️⃣ JDK 설치 (Gradle 빌드를 위해)
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      # 3️⃣ Gradle 빌드
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test
+
+      # 4️⃣ Docker 로그인
+      - name: Log in to Docker Hub
+        run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      # 5️⃣ Docker 이미지 빌드 및 푸시
+      - name: Build and push Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/my-springboot:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/my-springboot:latest
