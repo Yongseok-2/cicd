@@ -1,0 +1,25 @@
+services:
+  mysql:
+    image: mysql:8
+    container_name: my-db
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: testdb
+    ports:
+      - "3310:3306"
+    networks: 
+      - my-network
+
+  app:
+    build: .
+    container_name: my-springboot
+    ports:
+      - "8888:8888"
+    depends_on:
+      - mysql
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge
